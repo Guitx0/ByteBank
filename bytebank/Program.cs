@@ -7,6 +7,8 @@ namespace ByteBank1
         public static void ShowMenu(List<string> cpfs, List<string> titulares, List<string> senhas, List<double> saldos)
         {
             Console.Clear();
+            Console.WriteLine("----- Bem vindo ao Byte Bank -----");
+            Console.WriteLine();
             Console.WriteLine("1 - Inserir novo usuário");
             Console.WriteLine("2 - Deletar um usuário");
             Console.WriteLine("3 - Listar todas as contas registradas");
@@ -22,8 +24,13 @@ namespace ByteBank1
             int option;
 
             do
-            {               
+            {
                 option = int.Parse(Console.ReadLine());
+                if (option > 6)
+                {
+                    Console.Write("Opção inválida, digite novamente: ");
+                    option = int.Parse(Console.ReadLine());
+                }
                 Console.WriteLine();
                 Console.WriteLine("----------------------");
                 Console.WriteLine();
@@ -63,7 +70,7 @@ namespace ByteBank1
             cpfs.Add(Console.ReadLine());
             Console.Write("Insira o nome do titular: ");
             titulares.Add(Console.ReadLine());
-            Console.Write("insira a senha: ");
+            Console.Write("Insira a senha: ");
             senhas.Add(Console.ReadLine());
             saldos.Add(0);
             Console.WriteLine();
@@ -103,9 +110,9 @@ namespace ByteBank1
             Console.WriteLine();
             Console.WriteLine("Pressione qualquer tecla para voltar ao Menu Principal");
             Console.ReadKey();
-            ShowMenu(cpfs, titulares, senhas,  saldos);
+            ShowMenu(cpfs, titulares, senhas, saldos);
         }
-        public static void ApresentarConta( int index, List<string> cpfs, List<string> titulares, List<double> saldos)
+        public static void ApresentarConta(int index, List<string> cpfs, List<string> titulares, List<double> saldos)
         {
             Console.WriteLine($"CPF = {cpfs[index]} | Titular = {titulares[index]} | Saldo = R${saldos[index]:F2}");
         }
@@ -113,13 +120,13 @@ namespace ByteBank1
         {
             Console.Write("Informe o seu CPF: ");
             string entradaCpf = Console.ReadLine();
-            bool existeCpf = cpfs.Any(cpf => cpf.Equals(entradaCpf));
+            int existeCpf = cpfs.FindIndex(cpf => cpf == entradaCpf);
 
-            while (!existeCpf)
+            while (existeCpf == -1)
             {
                 Console.Write("CPF inválido, insira novamente ou digite SAIR para voltar ao Menu Principal:  ");
                 entradaCpf = Console.ReadLine();
-                existeCpf = cpfs.Any(cpf => cpf.Equals(entradaCpf));
+                existeCpf = cpfs.FindIndex(cpf => cpf == entradaCpf);
                 if (entradaCpf == "SAIR")
                 {
                     ShowMenu(cpfs, titulares, senhas, saldos);
@@ -127,13 +134,13 @@ namespace ByteBank1
             }
             Console.Write("Digite a senha: ");
             string entradaSenha = Console.ReadLine();
-            bool existeSenha = senhas.Any(senha => senha.Equals(entradaSenha));
+            int existeSenha = senhas.FindIndex(senha => senha == entradaSenha);
 
-            while (!existeSenha)
+            while (existeSenha == -1)
             {
                 Console.Write("Senha inválida, insira novamente ou digite SAIR para voltar ao Menu Principal:  ");
                 entradaSenha = Console.ReadLine();
-                existeSenha = senhas.Any(senha => senha.Equals(entradaSenha)); 
+                existeSenha = senhas.FindIndex(senha => senha == entradaSenha);
                 if (entradaSenha == "SAIR")
                 {
                     ShowMenu(cpfs, titulares, senhas, saldos);
@@ -167,7 +174,7 @@ namespace ByteBank1
             Console.ReadKey();
             ShowMenu(cpfs, titulares, senhas, saldos);
         }
-        public static void ManipularConta (List<string> cpfs, List<string> titulares, List<string> senhas, List<double> saldos)
+        public static void ManipularConta(List<string> cpfs, List<string> titulares, List<string> senhas, List<double> saldos)
         {
             string entradaCpf = ValidarCLient(cpfs, titulares, saldos, senhas);
             Console.Clear();
@@ -177,40 +184,53 @@ namespace ByteBank1
             Console.WriteLine("4 - Voltar ao menu anterior");
             Console.WriteLine();
             Console.Write("Digite a opção desejada: ");
-            Console.WriteLine();
-            string option = Console.ReadLine();
 
+            int option = int.Parse(Console.ReadLine());
+
+            if (option == 0 || option > 4)
+            {
+                Console.Write("Opção inválida!! Digite novamente: ");
+                option= int.Parse(Console.ReadLine());
+            }
             switch (option)
             {
-                case "1":
+                case 1:
                     Depositar(entradaCpf, cpfs, titulares, senhas, saldos);
                     break;
-                case "2":
+                case 2:
                     Sacar(entradaCpf, cpfs, titulares, senhas, saldos);
                     break;
-                case "3":
+                case 3:
                     Transferir(entradaCpf, cpfs, titulares, senhas, saldos);
                     break;
-                case "4":
+                case 4:
                     ShowMenu(cpfs, titulares, senhas, saldos);
-                    break;  
+                    break;
             }
+
         }
         public static void Transferir(string entradaCpf, List<string> cpfs, List<string> titulares, List<string> senhas, List<double> saldos)
         {
             int indexPagador = cpfs.IndexOf(entradaCpf);
             Console.Write("Informe o CPF do destinatário: ");
             string destCpf = Console.ReadLine();
+            Console.WriteLine();
             int indexDest = cpfs.IndexOf(destCpf);
             while (indexDest == -1)
             {
                 Console.WriteLine("CPF inválido, conta não encontrada!");
+                Console.WriteLine();
                 Console.Write("Informe um CPF válido: ");
                 destCpf = Console.ReadLine();
                 indexDest = cpfs.IndexOf(destCpf);
             }
             Console.Write("Digite o valor a ser transferido: R$ ");
             double valorTransf = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
+            if (valorTransf > saldos[indexPagador])
+            {
+                Console.Write("Valor indisponível! Digite novamente: ");
+                valorTransf = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
+            }
             saldos[indexPagador] -= valorTransf;
             saldos[indexDest] += valorTransf;
             Console.WriteLine("Transferência realizada com sucesso!!");
@@ -228,13 +248,18 @@ namespace ByteBank1
             int indexClient = cpfs.IndexOf(entradaCpf);
             Console.Write("Informe o valor a ser sacado: R$ ");
             double valorSaque = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
+            if (valorSaque > saldos[indexClient])
+            {
+                Console.Write("Valor indisponível! Digite outro valor: ");
+                valorSaque = double.Parse(Console.ReadLine(), CultureInfo.InvariantCulture);
+            }
             saldos[indexClient] -= valorSaque;
             Console.WriteLine("Saque efetuado com sucesso!!");
             Console.WriteLine();
             Console.WriteLine($"{titulares[indexClient]} seu novo saldo é de R$ {saldos[indexClient].ToString("F2", CultureInfo.InvariantCulture)}");
             Console.WriteLine();
             Console.WriteLine("----------------------");
-            Console.WriteLine("Aperte qualquer tecla para voltar ao Menu Principal");
+            Console.WriteLine("Aperte qualquer tecla para retornar ao Menu de operações");
             Console.ReadKey();
             ShowMenu(cpfs, titulares, senhas, saldos);
         }
@@ -253,7 +278,6 @@ namespace ByteBank1
             Console.WriteLine("Aperte qualquer tecla para voltar ao Menu Principal");
             Console.ReadKey();
             ShowMenu(cpfs, titulares, senhas, saldos);
-
         }
         public static void Main(string[] args)
         {
